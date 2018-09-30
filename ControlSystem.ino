@@ -24,6 +24,9 @@ const int btn=2,btn2=4;
 
 String binaryValue="00000000";
 
+int error=0;
+int lastError=0;
+
 //int RPWM = 255;
 //int LPWM = 255;
 
@@ -74,7 +77,12 @@ void loop() {
   binaryValue="";
   readSensor();
   convertBinary();
+  setError();
+  //run
   
+  
+  
+  lastError=error;
   
   while(digitalRead(btn)==HIGH){
     if(state == 0){
@@ -175,7 +183,7 @@ void readSensor(){
 }
 void convertBinary(){
   for(int i=0;i<8;i++){
-    /* Increase value from base value */
+    /* Increase value from base sensor value (Black Line) */
     if(whiteSensor[i] < 10){
       sensorAvg[i] = whiteSensor[i] + 60 + (whiteSensor[i] * 5);
     }else if(whiteSensor[i] < 30){
@@ -187,33 +195,100 @@ void convertBinary(){
     }
     
     if(analogBuffer[i] > sensorAvg[i]){
-      binaryValue+="0";
-      digitalBuffer[i]=0;
-    }else{
       binaryValue+="1";
       digitalBuffer[i]=1;
+    }else{
+      binaryValue+="0";
+      digitalBuffer[i]=0;
     }
-    Serial.print(i);
-    Serial.print(" : ");
-    Serial.print(whiteSensor[i]);
-    Serial.print(" | ");
-    Serial.print(analogBuffer[i]);
-    Serial.print(" | ");
-    Serial.print(sensorAvg[i]);
-    Serial.println();
+//    Serial.print(i);
+//    Serial.print(" : ");
+//    Serial.print(whiteSensor[i]);
+//    Serial.print(" | ");
+//    Serial.print(analogBuffer[i]);
+//    Serial.print(" | ");
+//    Serial.print(sensorAvg[i]);
+//    Serial.println();
 //    delay(200);
   }
-  Serial.println();
+//  Serial.println();
 }
 
-void runningMotor(int a, int b){
+void setError(){
+  if(binaryValue=="10000000"){
+    error=-6;
+  }else if(binaryValue=="11000000"){
+    error=-5;
+  }else if(binaryValue=="01000000"){
+    error=-4;
+  }else if(binaryValue=="01100000"){
+    error=-3;
+  }else if(binaryValue=="00100000"){
+    error=-2;
+  }else if(binaryValue=="00110000"){
+    error=-1;
+  }else if(binaryValue=="00010000" || binaryValue=="00011000" || binaryValue=="00001000"){
+    error=0;
+  }else if(binaryValue=="00001100"){
+    error=1;
+  }else if(binaryValue=="00000100"){
+    error=2;
+  }else if(binaryValue=="00000110"){
+    error=3;
+  }else if(binaryValue=="00000010"){
+    error=4;
+  }else if(binaryValue=="00000011"){
+    error=5;
+  }else if(binaryValue=="00000001"){
+    error=6;
+  }else{
+    if(error<0){
+      error=-7;
+    }else{
+      error=7;
+    }
+  }
+}
+void errorToPWM(){
+  switch(error){
+    case 0: runningMotor(100,100,"maju");break;
+    case 1: ;break;
+    case 2: ;break;
+    case 3: ;break;
+    case 4: ;break;
+    case 5: ;break;
+    case 6: ;break;
+    case 7: ;break;
+    case -1: ;break;
+    case -2: ;break;
+    case -3: ;break;
+    case -4: ;break;
+    case -5: ;break;
+    case -6: ;break;
+    case -7: ;break;
+  }
+}
+
+void runningMotor(int a, int b, String stat){
   /* Range 0-100 to run the Motor */
   double mapA = map(a, 0,100, 0,255);
   double mapB = map(b, 0,100, 0,255);
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, HIGH);
-  analogWrite(en1, mapA);
-  analogWrite(en2, mapB);
+  if(stat == "maju"){
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, HIGH); 
+    analogWrite(en1, mapA);
+    analogWrite(en2, mapB);
+  }else if(stat == "SKanan"){
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH); 
+    analogWrite(en1, 0);
+    analogWrite(en2, mapB);
+  }else if(stat == "SKiri"){
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW); 
+    analogWrite(en1, mapA);
+    analogWrite(en2, 0);
+  }
 }
 
 void mux(int y){
