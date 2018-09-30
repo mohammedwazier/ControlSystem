@@ -78,9 +78,9 @@ void loop() {
   readSensor();
   convertBinary();
   setError();
+  
   //run
-  
-  
+//  errorToPWM();
   
   lastError=error;
   
@@ -103,10 +103,11 @@ void loop() {
       display.setCursor(16,7);
       display.print("Need Calibration");
     }else{
-      
+      /* Displaying binary Value from sensor */
+      display.setCursor(38,7);
+      display.print(binaryValue);  
     }
-    display.setCursor(2,2);
-    display.print(binaryValue);
+    
     //Outer Rect
     display.drawRect(32,16,6,6, WHITE);
     display.drawRect(40,16,6,6, WHITE);
