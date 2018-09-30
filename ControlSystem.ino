@@ -80,7 +80,7 @@ void loop() {
   setError();
   
   //run
-//  errorToPWM();
+  
   
   lastError=error;
   
@@ -106,6 +106,7 @@ void loop() {
       /* Displaying binary Value from sensor */
       display.setCursor(38,7);
       display.print(binaryValue);  
+      errorToPWM();
     }
     
     //Outer Rect
@@ -253,20 +254,20 @@ void setError(){
 void errorToPWM(){
   switch(error){
     case 0: runningMotor(100,100,"maju");break;
-    case 1: runningMotor(90,100,"maju");break;
-    case 2: runningMotor(80,100,"maju");break;
-    case 3: runningMotor(70,100,"maju");break;
-    case 4: runningMotor(60,100,"maju");break;
-    case 5: runningMotor(50,100,"maju");break;
-    case 6: runningMotor(40,100,"maju");break;
-    case 7: runningMotor(30,100,"SKanan");break;
-    case -1: runningMotor(100,90,"maju");break;
-    case -2: runningMotor(100,80,"maju");break;
-    case -3: runningMotor(100,70,"maju");break;
-    case -4: runningMotor(100,60,"maju");break;
-    case -5: runningMotor(100,50,"maju");break;
-    case -6: runningMotor(100,40,"maju");break;
-    case -7: runningMotor(100,30,"SKiri");break;
+    case 1: runningMotor(100,90,"maju");break;
+    case 2: runningMotor(100,80,"maju");break;
+    case 3: runningMotor(100,70,"maju");break;
+    case 4: runningMotor(100,60,"maju");break;
+    case 5: runningMotor(100,50,"maju");break;
+    case 6: runningMotor(100,40,"maju");break;
+    case 7: runningMotor(100,30,"SKiri");break;
+    case -1: runningMotor(90,100,"maju");break;
+    case -2: runningMotor(80,100,"maju");break;
+    case -3: runningMotor(70,100,"maju");break;
+    case -4: runningMotor(60,100,"maju");break;
+    case -5: runningMotor(50,100,"maju");break;
+    case -6: runningMotor(40,100,"maju");break;
+    case -7: runningMotor(30,100,"SKanan");break;
   }
 }
 
