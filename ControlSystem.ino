@@ -5,41 +5,40 @@
   Copyright © 2018 Muhammad Waziruddin Akbar. All rights reserved.
 */
 
-#include <EEPROM.h>
+//#include <EEPROM.h>
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_GFX.h>
-
+//
 Adafruit_SSD1306 display(4);
 
 /* define PIN INPUT OUTPUT */
-const int sensor = A0;
+#define sensor A0
 
-const int s0=12;
-const int s1=8;
-const int s2=7;
+const int s0=A3;
+const int s1=11;
+const int s2=12;
 
-const int in1=3,en1=5;//EN = PWM
-const int in2=9,en2=6;//EN = PWM
-const int btn=2,btn2=4;
+
+const int in1=10,in2=8,en1=A2;//EN = PWM
+const int in3=9,in4=6,en2=A1;//EN = PWM
+const int btn=3,btn2=7;
 
 String binaryValue="00000000";
 
 int error=0;
-int lastError=0;
+//int lastError=0;
 
-//int RPWM = 255;
-//int LPWM = 255;
+int Kp = 1;
+int Sp = 0;
+int MAXPWM = 90;
+int MINPWM = 0;
+float intervalPWM = (MAXPWM - MINPWM) / 8;
 
-unsigned int state=0;
-unsigned int stateMenu=2, menu=0, buttonMax=0, calibrateStatus=0;
+int lPWM;
+int rPWM;
 
-//state
-//boolean buttonState=false;
-
-//define Array Value Sensor
-//float sensorValueMin[] = {1023, 1023, 1023, 1023, 1023, 1023, 1023, 1023};
-//float sensorValueMax[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-//int threshold[] = {10, 10, 10, 10, 10, 10, 10, 10};
+int state=0;
+int menu=0, buttonMax=0, calibrateStatus=0;
 
 int sensorAvg[] = {512, 512, 512, 512, 512, 512, 512, 512};
 int digitalBuffer[] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -48,8 +47,8 @@ int whiteSensor[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 
 void setup() {
-  pinMode(in1, OUTPUT);pinMode(en1, OUTPUT);
-  pinMode(in2, OUTPUT);pinMode(en2, OUTPUT);
+  pinMode(in1, OUTPUT);pinMode(in2, OUTPUT);pinMode(en1, OUTPUT);
+  pinMode(in3, OUTPUT);pinMode(in4, OUTPUT);pinMode(en2, OUTPUT);
   pinMode(btn, INPUT);pinMode(btn2, INPUT);
   pinMode(s0, OUTPUT);pinMode(s1, OUTPUT);pinMode(s2, OUTPUT);
   pinMode(sensor, INPUT);
@@ -63,7 +62,7 @@ void setup() {
 
   display.setCursor(27,12);
   display.println("Hello, world!");
-  outerBox();
+//  outerBox();
 
   display.display();
   delay(2000);
@@ -82,9 +81,9 @@ void loop() {
   //run
   
   
-  lastError=error;
+//  lastError=error;
   
-  while(digitalRead(btn)==HIGH){
+  while(digitalRead(btn)==LOW){
     if(state == 0){
       if(millis() >= buttonMax){   
        state=2;
@@ -104,9 +103,12 @@ void loop() {
       display.print("Need Calibration");
     }else{
       /* Displaying binary Value from sensor */
-      display.setCursor(38,7);
-      display.print(binaryValue);  
-      errorToPWM();
+        display.setCursor(16,7);
+        display.print(binaryValue);
+//        Serial.println(binaryValue);
+//      errorToPWM();
+//      lineFollow();
+//      driverMotor();
     }
     
     //Outer Rect
@@ -119,7 +121,7 @@ void loop() {
     display.drawRect(80,16,6,6, WHITE);
     display.drawRect(88,16,6,6, WHITE);
 
-    //Inner React
+//    //Inner React
     if(digitalBuffer[0]==1){
       display.fillRect(34,18,2,2,WHITE);  
     }
@@ -147,31 +149,16 @@ void loop() {
    }else if(state == 2){
     display.setCursor(2,2);
     display.print("Put Line Follower on the white Surface");
-//   }else if(state == 1){
      readWhiteSurface();
      calibrateStatus=1;
-    
    }
-   outerBox();
-  
    display.display();
-}
-void outerBox(){
-  /* Display outer White line */
-  for(int i=0;i<128;i++){
-    display.drawPixel(i, 0, WHITE);
-    display.drawPixel(i, 31, WHITE);
-  }
-  for(int i=0;i<32;i++){
-    display.drawPixel(0, i, WHITE);
-    display.drawPixel(127, i, WHITE);
-  }
 }
 
 void readWhiteSurface(){
   /* Sensor must be on white surface */
   for(int i=0;i<8;i++){
-    mux(i);
+//    mux(i);
     whiteSensor[i]=analogRead(sensor);
   }
 }
@@ -180,7 +167,17 @@ void readSensor(){
   /* Just Read sensor */
   for(int i=0;i<8;i++){
     mux(i);
-    analogBuffer[i]=analogRead(sensor);
+//    r0 = bitRead(i,0);
+//
+//    r1 = bitRead(i,1);
+//
+//    r2 = bitRead(i,2);
+    
+    if(calibrateStatus == 0){
+      whiteSensor[i]=analogRead(sensor);
+    }else{
+      analogBuffer[i]=analogRead(sensor);
+    }
   }
 }
 void convertBinary(){
@@ -203,46 +200,36 @@ void convertBinary(){
       binaryValue+="0";
       digitalBuffer[i]=0;
     }
-//    Serial.print(i);
-//    Serial.print(" : ");
-//    Serial.print(whiteSensor[i]);
-//    Serial.print(" | ");
-//    Serial.print(analogBuffer[i]);
-//    Serial.print(" | ");
-//    Serial.print(sensorAvg[i]);
-//    Serial.println();
-//    delay(200);
   }
-//  Serial.println();
 }
 
 void setError(){
   if(binaryValue=="10000000"){
-    error=-6;
-  }else if(binaryValue=="11000000"){
-    error=-5;
-  }else if(binaryValue=="01000000"){
-    error=-4;
-  }else if(binaryValue=="01100000"){
-    error=-3;
-  }else if(binaryValue=="00100000"){
-    error=-2;
-  }else if(binaryValue=="00110000"){
-    error=-1;
-  }else if(binaryValue=="00010000" || binaryValue=="00011000" || binaryValue=="00001000"){
-    error=0;
-  }else if(binaryValue=="00001100"){
-    error=1;
-  }else if(binaryValue=="00000100"){
-    error=2;
-  }else if(binaryValue=="00000110"){
-    error=3;
-  }else if(binaryValue=="00000010"){
-    error=4;
-  }else if(binaryValue=="00000011"){
-    error=5;
-  }else if(binaryValue=="00000001"){
     error=6;
+  }else if(binaryValue=="11000000" || binaryValue=="1110000"){
+    error=5;
+  }else if(binaryValue=="01000000"){
+    error=4;
+  }else if(binaryValue=="01100000"){
+    error=3;
+  }else if(binaryValue=="00100000"){
+    error=2;
+  }else if(binaryValue=="00110000" || binaryValue=="01110000"){
+    error=1;
+  }else if(binaryValue=="00010000" || binaryValue=="00011000" || binaryValue=="00001000" || binaryValue=="00111000" || binaryValue=="00011100"){
+    error=0;
+  }else if(binaryValue=="00001100" || binaryValue=="00001110"){
+    error=-1;
+  }else if(binaryValue=="00000100"){
+    error=-2;
+  }else if(binaryValue=="00000110"){
+    error=-3;
+  }else if(binaryValue=="00000010"){
+    error=-4;
+  }else if(binaryValue=="00000011" || binaryValue=="00000111"){
+    error=-5;
+  }else if(binaryValue=="00000001"){
+    error=-6;
   }else{
     if(error<0){
       error=-7;
@@ -251,47 +238,42 @@ void setError(){
     }
   }
 }
-void errorToPWM(){
-  switch(error){
-    case 0: runningMotor(100,100,"maju");break;
-    case 1: runningMotor(100,90,"maju");break;
-    case 2: runningMotor(100,80,"maju");break;
-    case 3: runningMotor(100,70,"maju");break;
-    case 4: runningMotor(100,60,"maju");break;
-    case 5: runningMotor(100,50,"maju");break;
-    case 6: runningMotor(100,40,"maju");break;
-    case 7: runningMotor(100,30,"SKiri");break;
-    case -1: runningMotor(90,100,"maju");break;
-    case -2: runningMotor(80,100,"maju");break;
-    case -3: runningMotor(70,100,"maju");break;
-    case -4: runningMotor(60,100,"maju");break;
-    case -5: runningMotor(50,100,"maju");break;
-    case -6: runningMotor(40,100,"maju");break;
-    case -7: runningMotor(30,100,"SKanan");break;
-  }
-}
-
-void runningMotor(int a, int b, String stat){
-  /* Range 0-100 to run the Motor */
-  double mapA = map(a, 0,100, 0,255);
-  double mapB = map(b, 0,100, 0,255);
-  if(stat == "maju"){
-    digitalWrite(in1, HIGH);
-    digitalWrite(in2, HIGH); 
-    analogWrite(en1, mapA);
-    analogWrite(en2, mapB);
-  }else if(stat == "SKanan"){
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, HIGH); 
-    analogWrite(en1, 0);
-    analogWrite(en2, mapB);
-  }else if(stat == "SKiri"){
-    digitalWrite(in1, HIGH);
-    digitalWrite(in2, LOW); 
-    analogWrite(en1, mapA);
-    analogWrite(en2, 0);
-  }
-}
+//void lineFollow() {
+////  robotPosition();
+//  int SetPoint = 0;                       // Setpoint yang diinginkan
+//  Error = SetPoint - error;                 // Error
+//  double DeltaError = Error - LastError;  // Delta Error (Selisih error sekarang e(t) dengan error sebelumya e(t-1))
+//  SumError += LastError;                  // Akumulasi error
+//  double P = Kp * Error;                  // Kontrol proporsional
+//  double I = Ki * SumError * Ts;          // Kontrol integral
+//  double D = ((Kd / Ts) * DeltaError);    // Kontrol derivative
+//  LastError = Error;                      // Error sebelumnya
+//  outPID = P + I + D;                     // Output PID
+//
+//  motorKi = BasePWM - outPID + offset;
+//  motorKa = BasePWM + outPID + offset;
+//  /*** Pembatasan kecepatan ***/
+//  if (motorKi > BasePWM)motorKi = BasePWM;
+//  if (motorKi < 0)motorKi = 0;
+//  if (motorKa > BasePWM)motorKa = BasePWM;
+//  if (motorKa < 0)motorKa = 0;
+//}
+//void driverMotor(){
+//  if(Pos>4){
+//     digitalWrite(in1, LOW);
+//     analogWrite(en1, BasePWM - motorKa);
+//  }else{
+//    digitalWrite(in1, HIGH);
+//    analogWrite(en1, motorKa);
+//  }
+//  if(Pos<-4){
+//    digitalWrite(in2, LOW);
+//    analogWrite(en2, BasePWM - motorKi);
+//  }else{
+//    digitalWrite(in2, HIGH);
+//    analogWrite(en2, motorKi);
+//  }
+//}
 
 void mux(int y){
   if (y==0){
