@@ -17,7 +17,7 @@ void pidSensor(){
   
   Lpwm = MAXPWM - MV;
   Rpwm = MAXPWM + MV;
-  Rpwm = (Rpwm*0.10) + Rpwm;
+  Rpwm = Rpwm + (MAXPWM*0.12);
 
   if (Lpwm > MAXPWM) Lpwm = MAXPWM;
   if (Lpwm < 0) Lpwm = 0;
@@ -49,39 +49,31 @@ void pidSensor(){
 //  }
 
 //  if(setRoda == 0){
-    if(error == -12){
+    if(error == -11){
       digitalWrite(in1, HIGH);
       digitalWrite(in2, LOW);
-      analogWrite(MotorKa, MAXPWM);
+      analogWrite(MotorKa, Rpwm);
       
       digitalWrite(in3, LOW);
       digitalWrite(in4, LOW);
       analogWrite(MotorKi, Lpwm); 
-    }else if(error == 12){
+    }else if(error == 11){
       digitalWrite(in1, LOW);
       digitalWrite(in2, LOW);
       analogWrite(MotorKa, Rpwm);
       
       digitalWrite(in3, HIGH);
       digitalWrite(in4, LOW);
-      analogWrite(MotorKi, MAXPWM); 
+      analogWrite(MotorKi, Lpwm); 
     }else{
       digitalWrite(in1, HIGH);
       digitalWrite(in2, LOW);
-      analogWrite(MotorKa, Rpwm);
+      analogWrite(MotorKa, Rpwm+(MAXPWM*0.10));
       
       digitalWrite(in3, HIGH);
       digitalWrite(in4, LOW);
-      analogWrite(MotorKi, Lpwm);   
+      analogWrite(MotorKi, Lpwm+(MAXPWM*0.10));   
     }
-//    digitalWrite(in1, HIGH);
-//    digitalWrite(in2, LOW);
-//    analogWrite(MotorKa, Rpwm);
-//    
-//    digitalWrite(in3, HIGH);
-//    digitalWrite(in4, LOW);
-//    analogWrite(MotorKi, Lpwm); 
-//  }
 }
 
 void rodaMati(){

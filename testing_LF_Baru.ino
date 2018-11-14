@@ -24,13 +24,13 @@ const int in3 = 6;
 const int in4 = A1;
 
 int SumError = 0;
-double Kp = 14;
+double Kp = 5;
 const int Ki = 0;
-double Kd = 7;
+double Kd = 8;
 const int Sp = 0;
 const double Ts = 1;        // Time sampling
 
-unsigned long MAXPWM = 200;
+unsigned long MAXPWM = 230;
 const int MINPWM = 0;
 //const float intervalPWM = (MAXPWM - MINPWM) / 8;
 int lastError=0;
