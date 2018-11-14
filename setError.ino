@@ -98,6 +98,42 @@ void setError(){
     error = 11;
   }
 
+
+  if(error == 2){
+    error = 1;
+  }else if(error == 5){
+    error = 2;
+  }else if(error == 6){
+    error = 3;
+  }else if(error == 7){
+    error = 4;
+  }else if(error == 8){
+    error = 5;
+  }else if(error == 9){
+    error = 6;
+  }else if(error == 10){
+    error = 7;
+  }else if(error > 0){
+    error = 8;
+  }
+
+  if(error == -2){
+    error = -1;
+  }else if(error == -5){
+    error = -2;
+  }else if(error == -6){
+    error = -3;
+  }else if(error == -7){
+    error = -4;
+  }else if(error == -8){
+    error = -5;
+  }else if(error == -9){
+    error = -6;
+  }else if(error == -10){
+    error = -7;
+  }else if(error < 0){
+    error = -8;
+  }
 //  error = retError(error);
 
 //  if(error == 2){
@@ -155,25 +191,3 @@ void setError(){
 //    }
 //  }
 }
-int retError(int data){
-  int retData = 0;
-  if(data == -2){
-    retData = -1;
-  }else if(data == -5){
-    retData = -2;
-  }else if(data == -6){
-    retData = -3;
-  }else if(data == -10){
-    retData = -4;
-  }else if(data == -12||sError==2){
-    retData = -5;
-  }else if(data == -13||sError==1){
-    retData = -6;
-  }else{
-    if(data != 0){
-      retData = -7;  
-    }
-  }
-  return retData;
-}
-

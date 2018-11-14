@@ -49,7 +49,7 @@ void pidSensor(){
 //  }
 
 //  if(setRoda == 0){
-    if(error == -11){
+    if(error == -8){
       digitalWrite(in1, HIGH);
       digitalWrite(in2, LOW);
       analogWrite(MotorKa, Rpwm);
@@ -57,7 +57,7 @@ void pidSensor(){
       digitalWrite(in3, LOW);
       digitalWrite(in4, LOW);
       analogWrite(MotorKi, Lpwm); 
-    }else if(error == 11){
+    }else if(error == 8){
       digitalWrite(in1, LOW);
       digitalWrite(in2, LOW);
       analogWrite(MotorKa, Rpwm);
